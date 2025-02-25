@@ -1,0 +1,21 @@
+model UserData {
+    userId            Int     @unique
+    resume            String? // обязательно
+    tags              String? // обязательно,это то поле которое типо Frontend OR разноробочий
+    userRequirements  String? // свои ебать хотелки пишет, что типо прям обязательыне и что если нет то нахуй вакансию
+    coverLetterEnding String? // залупа которую подставлять в конец сопроводительного
+
+    vacancies UserVacancies[]
+
+    @@map("UsersData")
+}
+
+model UserVacancies {
+    userId     Int
+    vacancyId  Int     @unique
+    interested Boolean
+
+    user UserData @relation(fields: [userId], references: [userId])
+
+    @@map("UsersVacancies")
+}

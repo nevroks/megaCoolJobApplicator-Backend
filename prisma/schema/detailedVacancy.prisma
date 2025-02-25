@@ -1,0 +1,14 @@
+model DetailedDBVacancy {
+    id                  Int @unique
+    url                 String
+    name                String // фронтенд лох
+    salary              String? // json или null
+    keySkills           String // короче будем через запятую склеивать их
+    work_schedule       String // удалённая работа
+    required_experience String // от 10 лет
+    description         String // самое важное поле
+    employment_form     String // полная занятость
+    area                String // мухосранск
+
+    @@map("DetailedDBVacancies")
+}
