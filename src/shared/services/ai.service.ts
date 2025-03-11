@@ -1,69 +1,142 @@
 
+import { Chat, LLM, LMStudioClient } from '@lmstudio/sdk';
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DetailedDBVacancy } from '@prisma/client';
 import OpenAI from 'openai';
 import { firstValueFrom } from 'rxjs';
 
+const systemPrompts = {
+  generateTags: `Тебе будет выдано описание пожеланий пользователя. На его основе тебе нужно будет сгенерировать запрос, используя язык запросов, который потом будет использоваться на площадке для поиска работы. Ты должен выделить основную профессию и конкретные навыки или области, упомянутые пользователем. Например, если описание пользователя похоже на то, что он готов работать frontend разработчиком и упоминает знание React и JavaScript, тогда твой ответ должен быть:
+
+Frontend OR фронтенд OR React OR JavaScript
+
+На каждый тип работы генерируй от 2 до 3 тегов, включая основную профессию и конкретные навыки. Не пиши никаких комментариев, просто выдай результат.`,
+  filterVacancies: `Ты — система для анализа данных. Твоя задача — сопоставить резюме пользователя с каждой вакансией из предоставленного JSON, добавив в каждую вакансию процент совпадения (compatibilityPercent). Если совпадение ниже 45%, исключи вакансию из результата.
+
+Требования:
+
+Входные данные: JSON с вакансиями, резюме пользователя, предпочтения пользователя.
+Выходные данные: JSON с вакансиями, включающий только те, у которых compatibilityPercent ≥ 45%.
+Добавь поле compatibilityPercent (тип: number) в каждую вакансию.
+Удали объект description из каждой вакансии.
+Добавь объекты pros и cons, которые будут перечислять преимущества и недостатки вакансии. В pros указывай, что крутого может предложить компания (например, социальный пакет, возможности карьерного роста, интересные проекты). В cons указывай недостатки, которые могут быть неудобны пользователю (например, требования к опыту, неудобный график работы). Оформляй их в кратком виде.
+Не изменяй и не добавляй другие поля.
+Возвращай только валидный JSON.
+Не пиши никаких пояснений, не давай никаких комментариев.
+Действуй, даже если данных недостаточно.
+    `
+}
+
 @Injectable()
 export class AIService {
-  private api: OpenAI;
+  private model: LLM;
 
-  constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('AI_API_KEY');
-    if (!apiKey) {
-      throw new Error('AI_API_KEY is not defined in environment variables');
-    }
-    this.api = new OpenAI({
-      apiKey,
-      baseURL: 'https://api.aimlapi.com/v1',
-    });
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService
+  ) {
+
   }
 
+  // async onModuleInit() {
+  //   const client = new LMStudioClient();
+  //   this.model = await client.llm.model("qwen2.5-3b-instruct");
+  // }
+
+  async generateTags(userPrompt: string) {
+    try {
+      // const chat = Chat.from([
+      //   { role: "system", content: systemPrompt },
+      //   { role: "user", content: userPrompt },
+      // ]);
+
+      // return (await this.model.respond(chat)).content;
+      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
+        model: 'qwen2.5-3b-instruct',
+        messages: [
+          { role: "system", content: systemPrompts.generateTags },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0,
+        stream: false
+      }));
 
 
+
+      return response.data.choices[0].message.content
+
+    } catch (error) {
+      throw new Error(`Error calling AI API: ${error.message}`);
+    }
+
+  }
   async sendRequest(userPrompt: string) {
-    const systemPrompt = "You are a helpful assistant, designed to communicate like a friend";
+    const systemPrompt = "Отвечай на любое сообщение слово 'яблоко'";
+
+
+
 
     try {
-      const completion = await this.api.chat.completions.create({
-        model: "mistralai/Mistral-7B-Instruct-v0.2",
+      // const chat = Chat.from([
+      //   { role: "system", content: systemPrompt },
+      //   { role: "user", content: userPrompt },
+      // ]);
+
+      // return (await this.model.respond(chat)).content;
+      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
+        model: 'qwen2.5-3b-instruct',
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.7,
-        max_tokens: 256,
-      });
+        temperature: 0.1,
+        stream: false
+      }));
 
-      return completion.choices[0].message.content;
+
+
+      return response.data.choices[0].message.content
+
     } catch (error) {
       throw new Error(`Error calling AI API: ${error.message}`);
     }
   }
 
   async filterVacancies({ vacancies, userResume, userRequirements = 'none' }: { vacancies: DetailedDBVacancy[], userResume: string, userRequirements?: string }) {
-    const systemPrompt = "Ты ассистент для аналитики данных, тебе будет приходить json вакансий, резюме пользователя, и предпочтения пользователя, твоя задача сопоставить резюме с каждой вакансией отдельно и добавить в них процент совпадения вакансии, если данный проценто составляет ниже 45 процентов то ты исключаеш данную вакансию из результирующего json, результат должен быть валидным json.Процент должен быть добавлен в json как compatibilityPercent, со значение типа number";
-    
+
+
     try {
-      const completion = await this.api.chat.completions.create({
-        model: "mistralai/Mistral-7B-Instruct-v0.2",
+      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
+        model: 'qwen2.5-3b-instruct',
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: systemPrompts.filterVacancies },
           {
-            role: "user",
-            content: `
+            role: "user", content: `
             json вакансий:${JSON.stringify(vacancies)}.
             резюме пользователя:${userResume}.
             предпочтения пользователя:${userRequirements}.`
-          },
+          }
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
-      });
-      console.log(completion.choices[0].message.content);
+        stream: false,
+        temperature: 0.1,
+      }))
 
-      return JSON.parse(completion.choices[0].message.content!);
+
+      // const chat = Chat.from([
+      //   { role: "system", content: systemPrompt },
+      //   {
+      //     role: "user", content: `
+      //       json вакансий:${JSON.stringify(vacancies)}.
+      //       резюме пользователя:${userResume}.
+      //       предпочтения пользователя:${userRequirements}.`
+      //   },
+      // ])
+      // const response = await this.model.respond(chat);
+
+      return response.data.choices[0].message.content
     }
     catch (error) {
       throw new Error(`Error calling AI API: ${error.message}`);

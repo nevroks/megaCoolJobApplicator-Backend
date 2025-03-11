@@ -3,13 +3,15 @@ import { UserDataService } from './user-data.service';
 import { UserDataController } from './user-data.controller';
 import { TokenPresenceMiddleware } from 'src/utils/middlewares/token-presence.middleware';
 import { JwtConfigModule } from 'src/utils/subModules/jwtConfigModule.module';
-import { PrismaService } from '@shared/services';
+import { AIService, PrismaService } from '@shared/services';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [JwtConfigModule],
+  imports: [HttpModule,JwtConfigModule],
   controllers: [UserDataController],
-  providers: [UserDataService, PrismaService, JwtService],
+  providers: [UserDataService, PrismaService, JwtService, AIService, ],
 })
 export class UserDataModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

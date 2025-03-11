@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { ConfigModule } from '@nestjs/config';
-import { EndpointsModule } from './endpoints/endpoints.module';
+import { EndpointsModule } from '@endpoints/endpoints.module';
 
 @Module({
   imports: [

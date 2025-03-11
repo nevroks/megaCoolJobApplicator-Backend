@@ -6,13 +6,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_ACCESS_EXPIRES_IN') },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        return ({
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn: configService.get<string>('JWT_ACCESS_EXPIRES_IN') },
+        })
+      },
       inject: [ConfigService],
     }),
   ],
   exports: [JwtModule],
 })
-export class JwtConfigModule {}
+export class JwtConfigModule { }

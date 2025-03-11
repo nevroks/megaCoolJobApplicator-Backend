@@ -21,3 +21,8 @@ export class UpdateUserDataDto {
     @IsOptional()
     coverLetterEnding?: string;
 }
+export class GenerateTagsDto {
+    @IsString()
+    @IsNotEmpty()
+    userPrompt: string;
+}

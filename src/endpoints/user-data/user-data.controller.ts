@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { UserDataService } from './user-data.service';
 import { JwtAuthGuard } from 'src/utils/guards/jwtAuthGuard.guard';
 import { JwtService } from '@nestjs/jwt';
-import { UpdateUserDataDto } from './dto';
+import { GenerateTagsDto, UpdateUserDataDto } from './dto';
 
 @Controller('user-data')
 @UseGuards(JwtAuthGuard)
@@ -34,5 +34,12 @@ export class UserDataController {
     const userId = payload.id;
 
     return this.userDataService.updateUserData(userId, updateUserDataDto);
+  }
+  
+  @Post('generate-tags')
+  generateTags(@Req() request, @Body() generateTagsDto: GenerateTagsDto) {
+    
+    return this.userDataService.generateTags(generateTagsDto.userPrompt);
+    
   }
 }

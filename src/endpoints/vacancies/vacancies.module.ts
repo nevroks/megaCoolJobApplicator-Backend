@@ -13,7 +13,7 @@ import { UserDataService } from '@endpoints/user-data';
 @Module({
   imports: [HttpModule, JwtConfigModule],
   controllers: [VacanciesController],
-  providers: [VacanciesService, HeadhunterService, PrismaService, AIService, JwtService, UserDataService],
+  providers: [VacanciesService, HeadhunterService, PrismaService, AIService, UserDataService],
 })
 export class VacanciesModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

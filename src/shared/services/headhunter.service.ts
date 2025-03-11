@@ -8,7 +8,7 @@ import { DetailedDBVacancy } from "@prisma/client";
 
 export type HHVacancy = {
     id: string;
-    premium: boolean;
+    premium: boolean; 
     name: string;
     department: string | null;
     has_test: boolean;
@@ -59,9 +59,9 @@ export type HHVacancy = {
     published_at: string;
     created_at: string;
     archived: boolean;
-    apply_alternate_url: string;
-    show_logo_in_search: boolean | null;
-    insider_interview: boolean | null;
+    apply_alternate_url: string; 
+    show_logo_in_search: boolean | null; 
+    insider_interview: boolean | null; 
     url: string;
     alternate_url: string;
     relations: any[];
@@ -78,7 +78,7 @@ export type HHVacancy = {
         vacancies_url: string;
         accredited_it_employer: boolean;
         trusted: boolean;
-    };
+    }; //del
     snippet: {
         requirement: string;
         responsibility: string;
@@ -93,7 +93,7 @@ export type HHVacancy = {
             country: string;
             formatted: string;
         }[];
-    };
+    }; 
     schedule: {
         id: string;
         name: string;
@@ -141,15 +141,15 @@ type GetVacanciesResponse = {
     pages: number
 }
 export type DetailedHHVacancy = {
-    id: number;
+    id: string;
     premium: boolean;
     billing_type: {
         id: string;
         name: string;
     };
-    relations: any[]; // Уточнить тип, если известен
+    relations: any[]; //del
     name: string;
-    insider_interview: null | any; // Уточнить тип, если известен
+    insider_interview: null | any; //del
     response_letter_required: boolean;
     area: {
         id: string;
@@ -184,12 +184,12 @@ export type DetailedHHVacancy = {
     contacts: null | any; // Уточнить тип, если известен
     description: string;
     branded_description: null | any; // Уточнить тип, если известен
-    vacancy_constructor_template: null | any; // Уточнить тип, если известен
+    vacancy_constructor_template: null | any; //del
     key_skills: {
         name: string;
     }[];
     accept_handicapped: boolean;
-    accept_kids: boolean;
+    accept_kids: boolean; //del
     archived: boolean;
     response_url: null | any; // Уточнить тип, если известен
     specializations: any[]; // Уточнить тип, если известен
@@ -200,8 +200,8 @@ export type DetailedHHVacancy = {
     code: null | any; // Уточнить тип, если известен
     hidden: boolean;
     quick_responses_allowed: boolean;
-    driver_license_types: any[]; // Уточнить тип, если известен
-    accept_incomplete_resumes: boolean;
+    driver_license_types: any[]; // del
+    accept_incomplete_resumes: boolean; //del
     employer: {
         id: string;
         name: string;
@@ -215,15 +215,15 @@ export type DetailedHHVacancy = {
         vacancies_url: string;
         accredited_it_employer: boolean;
         trusted: boolean;
-    };
+    }; //del
     published_at: string;
     created_at: string;
     initial_created_at: string;
     negotiations_url: null | any; // Уточнить тип, если известен
     suitable_resumes_url: null | any; // Уточнить тип, если известен
     apply_alternate_url: string;
-    has_test: boolean;
-    test: null | any; // Уточнить тип, если известен
+    has_test: boolean; //del
+    test: null | any; // del
     alternate_url: string;
     working_days: any[]; // Уточнить тип, если известен
     working_time_intervals: any[]; // Уточнить тип, если известен
@@ -272,17 +272,17 @@ export class HeadhunterService {
             console.error(`Error saving vacancy to DB: ${error.message}`);
         }
     }
-    async getVacancies({ tags, page, }: { tags: string, page: number }): Promise<GetVacanciesResponse> {
+    async getVacancies({ tags, page, per_page = 20 }: { tags: string, page: number, per_page?: number }): Promise<GetVacanciesResponse> {
         const url = `${this.headhunterApiUrl}/vacancies`;
         const params = {
             text: tags,
             search_field: "name",
-            per_page: 20,
+            per_page: per_page,
             page: page
             // Добавьте другие параметры, если необходимо
         };
         console.log('called');
-        
+
         try {
             const response = await firstValueFrom(
                 await this.httpService.get<GetVacanciesResponse>(url, {
@@ -313,7 +313,7 @@ export class HeadhunterService {
                         }),
                     );
                     const detailedVacancy: DetailedDBVacancy = {
-                        id: response.data.id,
+                        id: Number(response.data.id),
                         url: response.data.alternate_url,
                         name: response.data.name,
                         salary: Boolean(response.data.salary) ? JSON.stringify(response.data.salary) : null,

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DetailedDBVacancy } from '@prisma/client';
 import { AIService, PrismaService } from '@shared/services';
 import { HeadhunterService } from '@shared/services/headhunter.service';
@@ -12,7 +12,7 @@ type GetVacanciesResponse = {
 
 @Injectable()
 export class VacanciesService {
-    
+
     constructor(
         private readonly headhunterService: HeadhunterService,
         private readonly prisma: PrismaService,
@@ -30,43 +30,52 @@ export class VacanciesService {
         if (!userData) {
             throw new NotFoundException('User data for this userId is not found');
         }
+        if (!Boolean(userData.tags)) {
+            throw new BadRequestException('User tags are empty');
+        }
         let HHVacanciesPage = 1;
 
-        const resVacanciesCount = 21
+        const resVacanciesCount = 5
         const getVacanciesResponse: GetVacanciesResponse = { items: [], total: 0 };
+
+        let res:any = ''
 
         while (getVacanciesResponse.items.length < resVacanciesCount) {
             // Запрашиваем вакансии с текущей страницы
-            const vacanciesResponse = await this.headhunterService.getVacancies({ tags: userData.tags!, page: HHVacanciesPage });
+            const vacanciesResponse = await this.headhunterService.getVacancies({ tags: userData.tags!, page: HHVacanciesPage, per_page: resVacanciesCount });
             // Проверяем нету ли среди данных вакансий те что мы уже просматривали
             const freshVacancies = vacanciesResponse.items.filter(vacancy => !watchedVacancies.some(watchedVacancy => watchedVacancy.vacancyId === Number(vacancy.id)));
             // Получаем детальную информацию о вакансиях
+
+
             const detailedVacancies = await this.headhunterService.getDetailedVacancies(freshVacancies);
+            
 
-            const filteredVacancies = await this.ai.filterVacancies({
-                vacancies: detailedVacancies,
-                userResume: 'готов на всё', // Замените на реальное резюме пользователя
-                userRequirements: 'none' // Замените на реальные предпочтения пользователя
-            });
-
+            // const filteredVacancies = await this.ai.filterVacancies({
+            //     vacancies: detailedVacancies,
+            //     userResume: 'готов на всё', // Замените на реальное резюме пользователя
+            //     userRequirements: 'none' // Замените на реальные предпочтения пользователя
+            // });
+            res = detailedVacancies
+            break
             // Добавляем подходящие вакансии в результат
-            for (const vacancy of filteredVacancies) {
-                getVacanciesResponse.items.push(vacancy);
-                if (getVacanciesResponse.items.length === resVacanciesCount) {
-                    break;
-                }
-            }
+            // for (const vacancy of filteredVacancies) {
+            //     getVacanciesResponse.items.push(vacancy);
+            //     if (getVacanciesResponse.items.length === resVacanciesCount) {
+            //         break;
+            //     }
+            // }
 
             // Увеличиваем номер страницы для следующего запроса
-            HHVacanciesPage++;
+            // HHVacanciesPage++;
 
             // Если количество полученных вакансий меньше размера пакета, значит, мы достигли конца списка
-            if (vacanciesResponse.items.length < 20) {
-                break;
-            }
+            // if (vacanciesResponse.items.length < resVacanciesCount) {
+            //     break;
+            // }
         }
-
-        return getVacanciesResponse;
+        return res
+        // return getVacanciesResponse;
     }
     async changeVacancyInterest(userId, changeVacancyInterestDto: ChangeVacancyInterestDto) {
         if (Boolean(await this.prisma.userVacancies.findFirst({ where: { userId, vacancyId: changeVacancyInterestDto.vacancyId } }))) {

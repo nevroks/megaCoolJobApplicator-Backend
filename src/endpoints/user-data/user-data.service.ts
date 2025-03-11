@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@shared/services';
-import { UpdateUserDataDto } from './dto';
+import { AIService, PrismaService } from '@shared/services';
+import { GenerateTagsDto, UpdateUserDataDto } from './dto';
 
 @Injectable()
 export class UserDataService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly aiService: AIService
     ) { }
 
     async getUserData(userId: number) {
@@ -22,5 +23,8 @@ export class UserDataService {
             },
             data: updateUserDataDto
         });
+    }
+    async generateTags(userPrompt: string) {
+        return await this.aiService.generateTags(userPrompt);
     }
 }

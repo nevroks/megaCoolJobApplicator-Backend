@@ -11,6 +11,6 @@ export class MessageService {
         prompt: string
     }) {
         
-        return this.ai.sendRequest(data.prompt);
+        return await this.ai.sendRequest(data.prompt);
     }
 }
