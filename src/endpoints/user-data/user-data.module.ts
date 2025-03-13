@@ -12,7 +12,7 @@ import { JwtConfigModule } from '@shared/modules';
 @Module({
   imports: [HttpModule, JwtConfigModule],
   controllers: [UserDataController],
-  providers: [UserDataService, PrismaService, JwtService, AIService,],
+  providers: [UserDataService, PrismaService, AIService,],
 })
 export class UserDataModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

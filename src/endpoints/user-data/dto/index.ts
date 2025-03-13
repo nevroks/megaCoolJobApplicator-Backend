@@ -2,9 +2,6 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 
 export class UpdateUserDataDto {
-    @IsNumber()
-    userId: number;
-
     @IsString()
     @IsNotEmpty()
     resume: string;
