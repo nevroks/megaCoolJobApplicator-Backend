@@ -7,11 +7,12 @@ import { UserDataModule } from '@endpoints/user-data';
 import { MessageModule } from './message/message.module';
 import { VacanciesModule } from './vacancies/vacancies.module';
 import { AppModule } from '@endpoints/app';
+import { CoverLetterModule } from './cover-letter/cover-letter.module';
 
 
 
 
 @Module({
-    imports: [AuthModule, UsersModule, JwtTokenModule, UserDataModule, MessageModule, VacanciesModule, AppModule],
+    imports: [AuthModule, UsersModule, JwtTokenModule, UserDataModule, MessageModule, VacanciesModule, AppModule, CoverLetterModule],
 })
 export class EndpointsModule { }

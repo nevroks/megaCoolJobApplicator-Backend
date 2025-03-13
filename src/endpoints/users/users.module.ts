@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { JwtConfigModule } from 'src/utils/subModules/jwtConfigModule.module';
+import { JwtConfigModule } from '@shared/modules/jwtConfigModule.module';
 import { PrismaService } from '@shared/services';
 import { JwtAuthGuard } from 'src/utils/guards/jwtAuthGuard.guard';
 import { TokenPresenceMiddleware } from 'src/utils/middlewares/token-presence.middleware';

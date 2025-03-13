@@ -26,7 +26,29 @@ Frontend OR фронтенд OR React OR JavaScript
 Возвращай только валидный JSON.
 Не пиши никаких пояснений, не давай никаких комментариев.
 Действуй, даже если данных недостаточно.
-    `
+    `,
+  generateCoverLetter: ` Тебе будет предоставлена информация:
+
+vacancy: JSON-объект с данными о вакансии.
+resume: Резюме пользователя.
+coverLetterEnding: Окончание или обязательная информация для сопроводительного письма.
+Твоя задача — сгенерировать сопроводительное письмо для приёма на работу по данной вакансии. Обязательно проверь описание вакансии, так как иногда рекрутеры просят указать определённое слово или фразу. Если такое требование есть, вставь его в самое начало письма.
+
+Сопроводительное письмо должно:
+
+Начинаться с приветствия.
+Подчеркнуть соответствие кандидата требованиям вакансии.
+Выделить ключевые навыки и опыт, которые делают кандидата идеальным для этой роли.
+Завершаться уверенным тоном, но без излишней навязчивости.
+Пиши так, чтобы кандидат выглядел привлекательно для работодателя, но при этом не выпрашивал работу.
+
+Так же не пиши ту информацию которая и так указана в coverLetterEnding если такая есть.
+
+Нужно чтобы работадатель не понимал что ему пишет нейросеть.
+
+Не пиши никаких комментариев, просто выдай результат. 
+    
+  `
 }
 
 @Injectable()
@@ -45,34 +67,6 @@ export class AIService {
   //   const client = new LMStudioClient();
   //   this.model = await client.llm.model("qwen2.5-3b-instruct");
   // }
-
-  async generateTags(userPrompt: string) {
-    try {
-      // const chat = Chat.from([
-      //   { role: "system", content: systemPrompt },
-      //   { role: "user", content: userPrompt },
-      // ]);
-
-      // return (await this.model.respond(chat)).content;
-      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
-        model: 'qwen2.5-3b-instruct',
-        messages: [
-          { role: "system", content: systemPrompts.generateTags },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0,
-        stream: false
-      }));
-
-
-
-      return response.data.choices[0].message.content
-
-    } catch (error) {
-      throw new Error(`Error calling AI API: ${error.message}`);
-    }
-
-  }
   async sendRequest(userPrompt: string) {
     const systemPrompt = "Отвечай на любое сообщение слово 'яблоко'";
 
@@ -104,7 +98,33 @@ export class AIService {
       throw new Error(`Error calling AI API: ${error.message}`);
     }
   }
+  async generateTags(userPrompt: string) {
+    try {
+      // const chat = Chat.from([
+      //   { role: "system", content: systemPrompt },
+      //   { role: "user", content: userPrompt },
+      // ]);
 
+      // return (await this.model.respond(chat)).content;
+      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
+        model: 'qwen2.5-3b-instruct',
+        messages: [
+          { role: "system", content: systemPrompts.generateTags },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0,
+        stream: false
+      }));
+
+
+
+      return response.data.choices[0].message.content
+
+    } catch (error) {
+      throw new Error(`Error calling AI API: ${error.message}`);
+    }
+
+  }
   async filterVacancies({ vacancies, userResume, userRequirements = 'none' }: { vacancies: DetailedDBVacancy[], userResume: string, userRequirements?: string }) {
 
 
@@ -141,5 +161,31 @@ export class AIService {
     catch (error) {
       throw new Error(`Error calling AI API: ${error.message}`);
     }
+  }
+
+  async generateCoverLetter({ vacancy, resume, coverLetterEnding = 'none' }: { vacancy: DetailedDBVacancy, resume: string, coverLetterEnding?: string }) {
+    try {
+      const response = await firstValueFrom(this.httpService.post('http://localhost:1234/v1/chat/completions', {
+        model: 'qwen2.5-3b-instruct',
+        messages: [
+          { role: "system", content: systemPrompts.generateTags },
+          { role: "user", content: `
+            vacancy:${JSON.stringify(vacancy)}.
+            resume:${resume}.
+            coverLetterEnding:${coverLetterEnding}.
+            ` },
+        ],
+        temperature: 0,
+        stream: false
+      }));
+
+
+
+      return response.data.choices[0].message.content
+
+    } catch (error) {
+      throw new Error(`Error calling AI API: ${error.message}`);
+    }
+
   }
 }

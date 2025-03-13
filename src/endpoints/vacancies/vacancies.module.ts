@@ -5,7 +5,7 @@ import { HeadhunterService } from '@shared/services/headhunter.service';
 import { AIService, PrismaService } from '@shared/services';
 import { HttpModule } from '@nestjs/axios';
 import { TokenPresenceMiddleware } from 'src/utils/middlewares/token-presence.middleware';
-import { JwtConfigModule } from 'src/utils/subModules/jwtConfigModule.module';
+import { JwtConfigModule } from '@shared/modules';
 import { JwtService } from '@nestjs/jwt';
 import { UserDataService } from '@endpoints/user-data';
 

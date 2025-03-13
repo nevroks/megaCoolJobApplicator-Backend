@@ -62,10 +62,11 @@ export class AuthService {
                     password: registerDto.password,
                 },
             });
-            // Создаем данные пользователя с userId
+            // Создаем данные для пользователя с userId
             await prisma.userData.create({
                 data: {
-                    userId: user.id
+                    userId: user.id,
+                    
                 },
             });
         });
